@@ -6,8 +6,8 @@ Spree::User.class_eval do
   def apply_omniauth(omniauth)
     if omniauth['provider'] == "facebook"
       self.email = omniauth['info']['email'] if email.blank?
-      self.first_name = omniauth['info']['first_name'] if self.respond_to(:first_name)
-      self.last_name = omniauth['info']['last_name'] if self.respond_to(:last_name)
+      self.first_name = omniauth['info']['first_name'] if self.respond_to?(:first_name)
+      self.last_name = omniauth['info']['last_name'] if self.respond_to?(:last_name)
     end
     user_authentications.build(:provider => omniauth['provider'], :uid => omniauth['uid'])
   end
