@@ -1,8 +1,6 @@
 Spree::UserRegistrationsController.class_eval do
-  def create
-    super
-    session[:omniauth] = nil unless @user.new_record?
-  end
+
+  after_filter :clear_omniauth, :only => :create
 
   private
 
@@ -10,8 +8,11 @@ Spree::UserRegistrationsController.class_eval do
     super
     if session[:omniauth]
       @user.apply_omniauth(session[:omniauth])
-      @user.valid?
-      @user
     end
+    @user
+  end
+
+  def clear_omniauth
+    session[:omniauth] = nil unless @user.new_record?
   end
 end
