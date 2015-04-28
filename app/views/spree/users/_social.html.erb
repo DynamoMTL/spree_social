@@ -1,34 +1,31 @@
 <% if Spree::AuthenticationMethod.active_authentication_methods? %>
-<% @body_id = 'login' %>
-<div id="existing-customer">
-  <table>
-    <tr>
-      <% if @user.anonymous? %>
-        <%= render :partial => 'spree/shared/social_registrations', :locals => {:user => @user, :omniauth => @omniauth} %>
+  <% @body_id = 'login' %>
+  <div id="existing-customer">
+    <% if spree_current_user.user_authentications %>
+      <% unless spree_current_user.user_authentications.empty? %>
+        <h4><%= Spree.t(:you_have_signed_in_with_these_services) %></h4>
+        <div class="authentications">
+          <% for user_authentication in spree_current_user.user_authentications %>
+            <div class="authentication row">
+              <div class="provider col-md-2">
+                <%= content_tag(:i, '', class: "icon-spree-#{user_authentication.provider.to_url}-circled") %>
+                <%= user_authentication.provider %>
+              </div>
+              <div class="uid col-md-3">
+                <%= user_authentication.uid %>
+              </div>
+              <div class="col-md-2">
+                <%= link_to user_authentication, data: { confirm: "#{Spree.t(:remove_authentication_option_confirmation)}" }, method: :delete, class: 'btn btn-default' do %>
+                  <%= content_tag(:i, '', class: 'icon-delete') %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
       <% end %>
-    </tr>
-  </table>
-
-  <% if @user.user_authentications %>
-    <% unless @user.user_authentications.empty? %>
-      <p><strong><%= t(:you_have_signed_in_with_these_services) %>:</strong></p>
-      <div class="authentications">
-        <% for user_authentication in @user.user_authentications %>
-          <div class="authentication">
-            <%= image_tag "store/#{user_authentication.provider}_32.png", :size => "32x32", :class => "columns" %>
-            <div class="provider columns two"><%= user_authentication.provider %></div>
-            <div class="uid columns two"><%= user_authentication.uid %></div>
-            <%= link_to "X", user_authentication, :confirm => "#{t(:remove_authentication_option_confirmation)}", :method => :delete, :class => "remove" %>
-          </div>
-        <% end %>
-        <div class="clear"></div>
-      </div>
     <% end %>
-
-  <% end %>
-  <%= content_tag(:p, content_tag(:strong, t(:add_another_service_to_sign_in_with))) if Spree::AuthenticationMethod.available_for(@user).exists? %>
-  <%= render :partial => "spree/shared/social" %>
-</div>
-
-<div class="clear"></div>
+    <%= content_tag(:p, content_tag(:strong, Spree.t(:add_another_service))) if Spree::AuthenticationMethod.available_for(spree_current_user).exists? %>
+    <%= render 'spree/shared/social' %>
+  </div>
+  <div class="clear"></div>
 <% end %>

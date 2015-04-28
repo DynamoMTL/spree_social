@@ -1,9 +1,9 @@
-<%= render :partial => 'spree/admin/shared/configuration_menu' %>
-
-<h1><%= t("edit_social_method") %></h1>
-<%= render 'spree/shared/error_messages', :target => @authentication_method %>
-
-<%= form_for(@authentication_method, :url => admin_authentication_method_path(@authentication_method), :method => :put) do |f| %>
-  <%= render :partial => "form", :locals => { :auth_form => f } %>
-  <p class="form-buttons"><%= button t("edit") %></p>
+<% content_for :page_title do %>
+  <%= Spree.t(:edit_social_method) %>
 <% end %>
+
+<% content_for :page_actions do %>
+  <%= button_link_to Spree.t(:back_to_authentication_methods_list), spree.admin_authentication_methods_path, icon: 'arrow-left', class: 'btn-primary' %>
+<% end %>
+
+<%= render 'form', resource: @authentication_method %>

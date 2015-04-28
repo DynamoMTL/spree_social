@@ -1,20 +1,36 @@
-# Configure Rails Environment
-ENV["RAILS_ENV"] = "test"
-require File.expand_path("../dummy/config/environment.rb",  __FILE__)
+require 'simplecov'
+SimpleCov.start do
+  add_filter 'spec'
+  add_group  'Controllers', 'app/controllers'
+  add_group  'Helpers', 'app/helpers'
+  add_group  'Overrides', 'app/overrides'
+  add_group  'Models', 'app/models'
+  add_group  'Libraries', 'lib'
+end
+
+ENV['RAILS_ENV'] ||= 'test'
+
+begin
+  require File.expand_path('../dummy/config/environment', __FILE__)
+rescue LoadError
+  puts 'Could not load dummy application. Please ensure you have run `bundle exec rake test_app`'
+  exit
+end
+
 require 'rspec/rails'
-
-# Requires supporting ruby files with custom matchers and macros, etc,
-# in spec/support/ and its subdirectories.
-Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
-
-# Requires factories defined in spree_core
-require 'spree/core/testing_support/factories'
+require 'ffaker'
 
 RSpec.configure do |config|
-  # If you're not using ActiveRecord, or you'd prefer not to run each of your
-  # examples within a transaction, remove the following line or assign false
-  # instead of true.
-  config.use_transactional_fixtures = true
+  config.fail_fast = false
+  config.filter_run focus: true
+  config.run_all_when_everything_filtered = true
+  config.raise_errors_for_deprecations!
+  config.infer_spec_type_from_file_location!
 
-  config.include Spree::Core::Engine.routes.url_helpers, :type => :controller
+  config.mock_with :rspec
+  config.expect_with :rspec do |expectations|
+    expectations.syntax = :expect
+  end
 end
+
+Dir[File.join(File.dirname(__FILE__), 'support/**/*.rb')].each { |file| require file }

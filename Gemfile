@@ -1,13 +1,7 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
-group :test do
-  gem 'ffaker'
-end
-
-if RUBY_VERSION < "1.9"
-  gem "ruby-debug"
-else
-  gem "debugger"
-end
+spree_version = 'master'
+gem 'spree', github: 'spree/spree', branch: spree_version
+gem 'spree_auth_devise', github: 'spree/spree_auth_devise', branch: spree_version
 
 gemspec

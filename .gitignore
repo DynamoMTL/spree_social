@@ -10,3 +10,7 @@ nbproject
 spec/dummy
 .rvmrc
 .bundle
+Gemfile.lock
+coverage
+.ruby-version
+.ruby-gemset

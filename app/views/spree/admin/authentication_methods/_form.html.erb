@@ -1,27 +1,51 @@
-<p data-hook="environment">
-  <td><%= label_tag nil, t(:environment) %></td>
-  <td>
-    <%= collection_select(:authentication_method, :environment, Rails.configuration.database_configuration.keys, :to_s, :titleize, {}) %>
-  </td>
-</p>
+<%= form_for [:admin, resource] do |f| %>
 
-<%= auth_form.field_container :provider do %>
-  <%= auth_form.label :provider, t(:social_provider) %>
-  <%= auth_form.select :provider, SpreeSocial::OAUTH_PROVIDERS, { :include_blank => true } %>
-<% end %>
+  <div data-hook="admin_social_methods_form_fields">
+    <div class="row">
+      <div class="col-md-6">
+        <div data-hook="environment" class="form-group">
+          <%= label_tag nil, Spree.t(:environment) %>
+          <%= collection_select :authentication_method, :environment, Rails.configuration.database_configuration.keys, :to_s, :titleize, {}, class: 'select2' %>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div data-hook="environment" class="form-group">
+          <%= f.label :provider, Spree.t(:social_provider) %>
+          <%= f.select :provider, SpreeSocial::OAUTH_PROVIDERS.collect { |p| [ p[0], p[1] ] }, {}, { include_blank: false, class: 'select2' } %>
+        </div>
+      </div>
+    </div>
 
-<%= auth_form.field_container :api_key do %>
-  <%= auth_form.label :api_key, t(:social_api_key) %><br />
-  <%= auth_form.text_field :api_key %>
-<% end %>
+    <div class="row">
+      <div class="col-md-6">
+        <div data-hook="environment" class="form-group">
+          <%= f.label :api_key, Spree.t(:social_api_key) %>
+          <%= f.text_field :api_key, class: 'form-control' %>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div data-hook="environment" class="form-group">
+          <%= f.label :api_secret, Spree.t(:social_api_secret) %>
+          <%= f.text_field :api_secret, class: 'form-control' %>
+        </div>
+      </div>
+    </div>
 
-<%= auth_form.field_container :api_secret do %>
-  <%= auth_form.label :api_secret, t(:social_api_secret) %><br />
-  <%= auth_form.text_field :api_secret %>
-<% end %>
+    <div class="row">
+      <div class="col-md-6">
+        <div data-hook="environment" class="form-group">
+          <%= f.label :active, class: 'radio-inline' do %>
+            <%= f.radio_button :active, :true %>
+            <%= Spree.t(:active) %>
+          <% end %>
+          <%= f.label :active, class: 'radio-inline' do %>
+            <%= f.radio_button :active, :false %>
+            <%= Spree.t(:inactive) %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<%= auth_form.field_container :active do %>
-  <%= auth_form.label :active, t(:active) %><br />
-  <%= auth_form.radio_button :active, :true %><%= t(:yes) %>
-  <%= auth_form.radio_button :active, :false %><%= t(:no) %>
+  <%= render "spree/admin/shared/#{resource.new_record? ? 'new' : 'edit'}_resource_links" %>
 <% end %>

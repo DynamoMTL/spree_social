@@ -1,46 +1,65 @@
-SpreeSocial
-===========
+# Spree Social
 
-**NOTE: If you were contributing to the 0.70.x version of this extension, please make sure you are using the 0_70_stable branch, as this branch has recently been forced push to in order to release the 1.0.x extension rewrite.**
+[![Build Status](https://travis-ci.org/spree-contrib/spree_social.svg?branch=master)](https://travis-ci.org/spree-contrib/spree_social)
+[![Code Climate](https://codeclimate.com/github/spree-contrib/spree_social/badges/gpa.svg)](https://codeclimate.com/github/spree-contrib/spree_social)
 
-Core for all social media related functionality for Spree. 
-The Spree Social gem handles authorization, account creation and association through social media sources such as Twitter and Facebook. 
-This requires the edge source of [Spree](https://github.com/spree/spree). 
-This gem is beta at best and should be treated as such. 
-Features and code base will change rapidly as this is under active development. 
+Core for all social media related functionality for Spree.
+The Spree Social gem handles authorization, account creation and association through social media sources such as Twitter and Facebook.
+This gem is beta at best and should be treated as such.
+Features and code base will change rapidly as this is under active development.
 Use with caution.
 
-Setup for Production
---------------------
-Add this extension to your Gemfile:
+---
 
+## Setup for Production
+
+Add this extension to your `Gemfile`:
 ```ruby
-gem "spree_social", :git => "git://github.com/spree/spree_social.git"
+gem 'spree_social', github: 'spree-contrib/spree_social', branch: 'master'
 ```
 
 Then run:
-
-```
-bundle update
-bundle exec rails g spree_social:install
-rake db:migrate
+```sh
+$ bundle && bundle exec rails g spree_social:install
+$ bundle exec rake db:migrate
 ```
 
-Spree Setup to Utilize OAuth Sources
-------------------------------------
+Preference(optional): By default url will be `/users/auth/:provider`. If you wish to modify the url to: `/member/auth/:provider`, `/profile/auth/:provider`, or `/auth/:provider` then you can do this accordingly in your **config/initializers/spree.rb** file as described below:
+
+```ruby
+Spree::SocialConfig[:path_prefix] = 'member'  # for /member/auth/:provider
+Spree::SocialConfig[:path_prefix] = 'profile' # for /profile/auth/:provider
+Spree::SocialConfig[:path_prefix] = ''        # for /auth/:provider
+```
+
+---
+
+## Spree Setup to Utilize OAuth Sources
 
 Login as an admin user and navigate to Configuration > Social Authentication Methods
 
-Click on the New Authentication Method button to enter the key obtained from their respective source
-(See below for instructions on setting up the various providers)
+Click on the New Authentication Method button to enter the key obtained from their respective source, (See below for instructions on setting up the various providers).
 
 Multiple key entries can now be entered based on the rails environment. This allows for portability and the lack of need to check in your key to your repository. You also have the ability to enable and disable sources. These setting will be reflected on the client UI as well.
 
-**You MUST restart your application after configuring or
-updating an authentication method.**
+Alternatively you can ship keys as environment variables and create these Authentication Method records on application boot via an initializer. Below is an example for facebook.
 
-Setup the Applications at the Respective Sources
-------------------------------------------------
+```ruby
+# Ensure our environment is bootstrapped with a facebook connect app
+if ActiveRecord::Base.connection.table_exists? 'spree_authentication_methods'
+  Spree::AuthenticationMethod.where(environment: Rails.env, provider: 'facebook').first_or_create do |auth_method|
+    auth_method.api_key = ENV['FACEBOOK_APP_ID']
+    auth_method.api_secret = ENV['FACEBOOK_APP_SECRET']
+    auth_method.active = true
+  end
+end
+```
+
+**You MUST restart your application after configuring or updating an authentication method.**
+
+---
+
+## Setup the Applications at the Respective Sources
 
 OAuth Applications @ Facebook, Twitter and / or Github are supported out of the box but you will need to setup applications are each respective site as follows for public use and for development.
 
@@ -48,7 +67,7 @@ OAuth Applications @ Facebook, Twitter and / or Github are supported out of the 
 
 ### Facebook
 
-[Facebook](http://www.facebook.com/developers/createapp.php): [http://www.facebook.com/developers/createapp.php](http://www.facebook.com/developers/createapp.php)
+[Facebook / Developers / Apps][2]
 
 1. Name the app what you will and agree to the terms.
 2. Fill out the capcha
@@ -58,7 +77,7 @@ OAuth Applications @ Facebook, Twitter and / or Github are supported out of the 
 
 ### Twitter
 
-[Twitter](http://dev.twitter.com/apps/new): [http://dev.twitter.com/apps/new](http://dev.twitter.com/apps/new)
+[Twitter / Application Management / Create an application][3]
 
 1. Name and Description must be filled in with something
 2. Application Website: http://your_computer.local:3000 for development / http://your-site.com for production
@@ -69,57 +88,67 @@ OAuth Applications @ Facebook, Twitter and / or Github are supported out of the 
 
 ### Github
 
-[Github](http://github.com/account/applications/new): [http://github.com/account/applications/new](http://github.com/account/applications/new)
+[Github / Applications / Register a new OAuth application][4]
 
 1. Name The Application
 2. Main URL: http://your_computer.local:3000 for development / http://your-site.com for production
 3. Callback URL: http://your_computer.local:3000 for development / http://your-site.com for production
 4. Click Create
 
-> This does not seem to be a listed Github item right now. To View and / or edit your applications goto [http://github.com/account/applications/]([http://github.com/account/applications/])
+> This does not seem to be a listed Github item right now. To View and / or edit your applications goto [http://github.com/account/applications](http://github.com/account/applications)
 
-### Other OAuth sources that a currently supported
+### Amazon
+
+[Amazon / App Console / Register a new OAuth application][10]
+
+1. Register New Application
+2. Name the Application, provide description and URL for Privacy Policy
+3. Click Save
+4. Add Your site under Web Settings > Allowed Return URLs (example: http://localhost:3000/users/auth/amazon/callback)
+
+> The app console is available at [https://login.amazon.com/manageApps](https://login.amazon.com/manageApps)
+
+### Other OAuth sources that are currently supported
 
 * Google (OAuth)
 
-Setup for Development
----------------------
+## Adding other OAuth sources
 
-```
-git clone git://github.com/spree/spree
-git clone git://github.com/spree/spree_social
-cd spree
-bundle install
-bundle exec rake sandbox
-```
+It is easy to add any OAuth source, given there is an OmniAuth strategy gem for it (and if not, you can easily [write one by yourself](https://github.com/intridea/omniauth/wiki/Strategy-Contribution-Guide). For instance, if you want to add authorization via LinkedIn, the steps will be:
 
-add this to sandbox/Gemfile:
+1, Add `gem "omniauth-linkedin"` to your Gemfile, run `bundle install`.
+
+2, In an initializer file, e.g. `config/initializers/devise.rb`, add and init a new provider for SpreeSocial:
+
+**Optional**: If you want to skip the sign up phase where the user has to provide an email and a password, add a third parameter to the provider entry and the Spree user will be created directly using the email field in the [Auth Hash Schema](https://github.com/intridea/omniauth/wiki/Auth-Hash-Schema):
 
 ```ruby
-gem 'spree_social', :path => '../spree_social'
+SpreeSocial::OAUTH_PROVIDERS << ['LinkedIn', 'linkedin', 'true']
+SpreeSocial.init_provider('linkedin')
 ```
 
-Then run:
+3, Activate your provider as usual (via initializer or admin interface).
 
-```
-bundle update
-rails g spree_social:install
-bundle exec rake db:migrate
-```
+4, Override `spree/users/social` view to render OAuth links in preferred way for a new one to be displayed. Or alternatively, include to your CSS a definition for `.icon-spree-linkedin-circled` and an embedded icon font for LinkedIn from [fontello.com](http://fontello.com/) (the way existing icons for Facebook, Twitter, etc are implemented). You can also override CSS classes for other providers, `.icon-spree-<provider>-circled`, to use different font icons or classic background images, without having to override views.
 
-Testing
--------
+---
 
-Inside of your cloned spree_social folder, run:
+## Contributing
 
-```
-bundle exec rake test_app
-bundle exec rspec spec
-```
+See corresponding [guidelines][11].
 
-Adding your own Auth Source
----------------------------
+---
 
-> Most auth sources supported by the Omniauth gem can be added. I attempt to keep the popular ones included and tested.
+Copyright (c) 2010-2015 [John Dyer][7] and [contributors][8], released under the [New BSD License][9]
 
-Copyright (c) 2012 John Brien Dilts, released under the New BSD License
+[1]: https://github.com/spree/spree
+[2]: https://developers.facebook.com/apps/?action=create
+[3]: https://apps.twitter.com/app/new
+[4]: https://github.com/settings/applications/new
+[5]: http://www.fsf.org/licensing/essays/free-sw.html
+[6]: https://github.com/spree-contrib/spree_social/issues
+[7]: https://github.com/LBRapid
+[8]: https://github.com/spree-contrib/spree_social/graphs/contributors
+[9]: https://github.com/spree-contrib/spree_social/blob/master/LICENSE.md
+[10]: https://login.amazon.com/manageApps
+[11]: https://github.com/spree-contrib/spree_social/blob/master/CONTRIBUTING.md
