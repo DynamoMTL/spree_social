@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/spree-contrib/spree_social.svg?branch=master)](https://travis-ci.org/spree-contrib/spree_social)
 [![Code Climate](https://codeclimate.com/github/spree-contrib/spree_social/badges/gpa.svg)](https://codeclimate.com/github/spree-contrib/spree_social)
+[![Solidus Ready](https://img.shields.io/badge/solidus-ready-ef8e1f.svg)](https://github.com/DynamoMTL/spree_social/tree/solidus)
 
 Core for all social media related functionality for Spree.
 The Spree Social gem handles authorization, account creation and association through social media sources such as Twitter and Facebook.
