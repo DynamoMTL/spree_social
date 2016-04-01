@@ -56,7 +56,7 @@ module OmniAuth
                             'mobile'
       def request_phase
         options[:scope] ||= 'email'
-        options[:info_fields] ||= 'email, first_name, last_name'
+        options[:info_fields] ||= 'email,first_name,last_name'
         options[:display] = mobile_request? ? 'touch' : 'page'
         super
       end
